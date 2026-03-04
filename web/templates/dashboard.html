@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SOC Dashboard</title>
+    <meta http-equiv="refresh" content="5">
+    <style>
+        body { font-family: Arial; background: #111; color: white; }
+        h1 { text-align: center; }
+        .card { background: #222; padding: 20px; margin: 10px; border-radius: 10px; display: inline-block; width: 22%; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { padding: 10px; border: 1px solid #333; text-align: center; }
+        th { background: #333; }
+    </style>
+</head>
+<body>
+
+<h1>SMART AUTHENTICATION SOC DASHBOARD</h1>
+
+<div>
+    <div class="card">
+        <h3>Total Failed Attempts</h3>
+        <h2>{{ total_failed }}</h2>
+    </div>
+
+    <div class="card">
+        <h3>Unique Attacker IPs</h3>
+        <h2>{{ unique_ips }}</h2>
+    </div>
+
+    <div class="card">
+        <h3>Blocked IPs</h3>
+        <h2>{{ blocked }}</h2>
+    </div>
+
+    <div class="card">
+        <h3>ML Anomalies</h3>
+        <h2>{{ ml_alerts }}</h2>
+    </div>
+</div>
+
+<h2>Blocked IP Table</h2>
+
+<table>
+    <tr>
+        <th>IP Address</th>
+        <th>Severity</th>
+        <th>Blocked At</th>
+    </tr>
+
+    {% for ip, data in blocked_ips.items() %}
+    <tr>
+        <td>{{ ip }}</td>
+        <td>{{ data.severity }}</td>
+        <td>{{ data.blocked_at }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+</body>
+</html>
