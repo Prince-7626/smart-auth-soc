@@ -338,50 +338,9 @@
                 <th>Block Status</th>
             </tr>
         </thead>
-        <tbody>
-            <tr>
-                <td><code style="background: #f5f5f5; padding: 0.25rem 0.5rem; border-radius: 2px; font-size: 12px;">192.168.1.100</code></td>
-                <td>Unknown</td>
-                <td>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 95%">45</div>
-                    </div>
-                </td>
-                <td><span class="severity-badge critical">Critical</span></td>
-                <td><span style="color: #28a745; font-weight: 600;">✓ Blocked</span></td>
-            </tr>
-            <tr>
-                <td><code style="background: #f5f5f5; padding: 0.25rem 0.5rem; border-radius: 2px; font-size: 12px;">10.0.0.50</code></td>
-                <td>New York, US</td>
-                <td>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 35%">17</div>
-                    </div>
-                </td>
-                <td><span class="severity-badge high">High</span></td>
-                <td><span style="color: #ff9900; font-weight: 600;">⚠ Watching</span></td>
-            </tr>
-            <tr>
-                <td><code style="background: #f5f5f5; padding: 0.25rem 0.5rem; border-radius: 2px; font-size: 12px;">172.16.0.25</code></td>
-                <td>Los Angeles, US</td>
-                <td>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 40%">19</div>
-                    </div>
-                </td>
-                <td><span class="severity-badge high">High</span></td>
-                <td><span style="color: #28a745; font-weight: 600;">✓ Blocked</span></td>
-            </tr>
-            <tr>
-                <td><code style="background: #f5f5f5; padding: 0.25rem 0.5rem; border-radius: 2px; font-size: 12px;">203.0.113.45</code></td>
-                <td>London, UK</td>
-                <td>
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: 25%">12</div>
-                    </div>
-                </td>
-                <td><span class="severity-badge medium">Medium</span></td>
-                <td><span style="color: #ff9900; font-weight: 600;">⚠ Monitoring</span></td>
+        <tbody id="threatsTableBody">
+            <tr style="text-align: center; padding: 2rem;">
+                <td colspan="5" style="color: #999; padding: 2rem;">Loading threat data...</td>
             </tr>
         </tbody>
     </table>
@@ -537,6 +496,59 @@
     }
 
     // Initialize charts when page loads
-    document.addEventListener('DOMContentLoaded', loadAndRenderCharts);
+    document.addEventListener('DOMContentLoaded', async function() {
+        loadAndRenderCharts();
+        loadThreatData();
+    });
+
+    async function loadThreatData() {
+        try {
+            const response = await fetch('/api/detection/threats');
+            if (!response.ok) {
+                console.error('Failed to fetch threats:', response.status);
+                return;
+            }
+            
+            const data = await response.json();
+            const tbody = document.getElementById('threatsTableBody');
+            
+            if (data.threats.length === 0) {
+                tbody.innerHTML = '<tr style="text-align: center; padding: 2rem;"><td colspan="5" style="color: #999; padding: 2rem;">No threats detected</td></tr>';
+                return;
+            }
+            
+            let html = '';
+            for (const threat of data.threats.slice(0, 10)) {
+                const severityColor = {
+                    'CRITICAL': '#dc3545',
+                    'HIGH': '#ff6b6b',
+                    'MEDIUM': '#ffc107',
+                    'LOW': '#17a2b8'
+                }[threat.severity] || '#666';
+                
+                const blockStatus = threat.status === 'CLOSED' ? '✓ Resolved' : threat.severity === 'CRITICAL' ? '✓ Blocked' : '⚠ Monitoring';
+                const statusColor = threat.severity === 'CRITICAL' ? '#28a745' : '#ff9900';
+                
+                html += `
+                    <tr>
+                        <td><code style="background: #f5f5f5; padding: 0.25rem 0.5rem; border-radius: 2px; font-size: 12px;">${threat.source_ip}</code></td>
+                        <td>${threat.title.substring(0, 30)}...</td>
+                        <td>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${Math.min(threat.attack_attempts * 10, 100)}%">${threat.attack_attempts}</div>
+                            </div>
+                        </td>
+                        <td><span class="severity-badge" style="background: ${severityColor}; color: white; padding: 0.25rem 0.75rem;">${threat.severity}</span></td>
+                        <td><span style="color: ${statusColor}; font-weight: 600;">${blockStatus}</span></td>
+                    </tr>
+                `;
+            }
+            
+            tbody.innerHTML = html;
+        } catch (error) {
+            console.error('Error loading threat data:', error);
+            document.getElementById('threatsTableBody').innerHTML = '<tr><td colspan="5" style="text-align: center; color: red;">Error loading threats</td></tr>';
+        }
+    }
 </script>
 {% endblock %}

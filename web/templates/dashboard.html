@@ -283,6 +283,13 @@
         <div class="metric-value" id="metric-anomalies">{{ ml_alerts }}</div>
         <div class="metric-change">Detected</div>
     </div>
+
+    <div class="metric-card">
+        <div class="metric-icon">⚠️</div>
+        <div class="metric-label">Active Threats</div>
+        <div class="metric-value" id="metric-threats">0</div>
+        <div class="metric-change">Detected</div>
+    </div>
 </div>
 
 <!-- Security Services -->
@@ -398,6 +405,16 @@
                 document.getElementById('metric-anomalies').textContent = data.ml_alerts;
             })
             .catch(error => console.error('Error:', error));
+        
+        // Load threat detection summary
+        fetch('/api/detection/summary')
+            .then(response => response.json())
+            .then(data => {
+                const totalThreats = (data.critical_incidents || 0) + (data.high_incidents || 0);
+                document.getElementById('metric-threats').textContent = totalThreats;
+            })
+            .catch(error => console.error('Error fetching threat summary:', error));
+
     }
 
     // Refresh every 10 seconds

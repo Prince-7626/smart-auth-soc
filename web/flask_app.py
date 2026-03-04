@@ -437,6 +437,132 @@ def api_metrics_summary():
         app.logger.error(f"Error generating metrics summary: {e}")
         return jsonify({'error': str(e)}), 500
 
+# Log Detection API Endpoints
+@app.route('/api/detection/threats')
+@login_required
+def api_detection_threats():
+    """Get detected threats from database"""
+    try:
+        # Query recent incidents from database
+        from app.database import Incident
+        recent_incidents = db.session.query(Incident).filter(
+            Incident.created_at >= datetime.utcnow() - timedelta(days=7)
+        ).order_by(Incident.created_at.desc()).limit(50).all()
+        
+        threats = []
+        for inc in recent_incidents:
+            threats.append({
+                'id': inc.incident_id,
+                'title': inc.title,
+                'severity': inc.severity,
+                'source_ip': inc.source_ip,
+                'status': inc.status,
+                'created_at': inc.created_at.isoformat(),
+                'attack_attempts': inc.attack_attempts
+            })
+        
+        return jsonify({'threats': threats, 'total': len(threats)})
+    except Exception as e:
+        app.logger.error(f"Error fetching threats: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/detection/alerts')
+@login_required
+def api_detection_alerts():
+    """Get recent security alerts"""
+    try:
+        from app.database import AuditLog
+        limit = request.args.get('limit', 20, type=int)
+        
+        # Get recent failed login attempts and suspicious activities
+        alerts = db.session.query(AuditLog).filter(
+            AuditLog.status == 'failure',
+            AuditLog.timestamp >= datetime.utcnow() - timedelta(hours=24)
+        ).order_by(AuditLog.timestamp.desc()).limit(limit).all()
+        
+        alert_list = []
+        for alert in alerts:
+            alert_list.append({
+                'id': alert.id,
+                'action': alert.action,
+                'status': alert.status,
+                'source_ip': alert.source_ip,
+                'timestamp': alert.timestamp.isoformat(),
+                'details': alert.details
+            })
+        
+        return jsonify({'alerts': alert_list, 'total': len(alert_list)})
+    except Exception as e:
+        app.logger.error(f"Error fetching alerts: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/detection/summary')
+@login_required
+def api_detection_summary():
+    """Get threat detection summary"""
+    try:
+        from app.database import Incident, BlockedIP, AuditLog
+        from sqlalchemy import func
+        
+        # Count incidents by severity (last 7 days)
+        cutoff = datetime.utcnow() - timedelta(days=7)
+        severity_counts = db.session.query(
+            Incident.severity,
+            func.count(Incident.id).label('count')
+        ).filter(Incident.created_at >= cutoff).group_by(Incident.severity).all()
+        
+        severities = {s[0]: s[1] for s in severity_counts}
+        
+        # Count blocked IPs
+        total_blocked = BlockedIP.query.count()
+        recently_blocked = BlockedIP.query.filter(
+            BlockedIP.blocked_at >= cutoff
+        ).count()
+        
+        # Count failed logins (last 24 hours)
+        failed_logins = AuditLog.query.filter(
+            AuditLog.status == 'failure',
+            AuditLog.timestamp >= datetime.utcnow() - timedelta(hours=24)
+        ).count()
+        
+        summary = {
+            'critical_incidents': severities.get('CRITICAL', 0),
+            'high_incidents': severities.get('HIGH', 0),
+            'medium_incidents': severities.get('MEDIUM', 0),
+            'low_incidents': severities.get('LOW', 0),
+            'total_blocked_ips': total_blocked,
+            'recently_blocked': recently_blocked,
+            'failed_logins_24h': failed_logins,
+            'detection_status': 'ACTIVE'
+        }
+        
+        return jsonify(summary)
+    except Exception as e:
+        app.logger.error(f"Error generating detection summary: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/detection/analyze', methods=['POST'])
+@login_required
+def api_detection_analyze():
+    """Analyze logs for threats"""
+    try:
+        from app.log_detection import detection_engine
+        
+        # Get log lines from request
+        data = request.get_json()
+        log_lines = data.get('logs', [])
+        
+        if not log_lines:
+            return jsonify({'error': 'No logs provided'}), 400
+        
+        # Process logs
+        results = detection_engine.process_log_stream(log_lines)
+        
+        return jsonify(results)
+    except Exception as e:
+        app.logger.error(f"Error analyzing logs: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/logout')
 def logout():
     username = session.get('username')
