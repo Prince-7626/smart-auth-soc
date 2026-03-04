@@ -21,6 +21,10 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # Import and initialize database
 from app.database import db, init_db, User, BlockedIP, Incident, AuditLog
 from app.migrations import migrate_json_to_db
+from app.security import (
+    InputValidator, CSRFProtection, RateLimiter, 
+    SecurityHeaders, APIAuth, require_api_key, rate_limit
+)
 
 db.init_app(app)
 
@@ -156,9 +160,32 @@ def index():
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
+    if request.method == 'GET':
+        # Generate CSRF token for form
+        csrf_token = CSRFProtection.generate_token()
+        session['csrf_token'] = csrf_token
+        return render_template('login.html', csrf_token=csrf_token)
+    
     if request.method == 'POST':
-        username = request.form.get('username')
-        password = request.form.get('password')
+        # Validate CSRF token
+        csrf_token = request.form.get('csrf_token')
+        stored_token = session.get('csrf_token')
+        if not csrf_token or not stored_token or not CSRFProtection.validate_token(csrf_token, stored_token):
+            return render_template('login.html', error='Security validation failed. Please try again.'), 403
+        
+        # Get and validate inputs
+        username = request.form.get('username', '').strip()
+        password = request.form.get('password', '')
+        
+        # Input validation
+        try:
+            username = InputValidator.sanitize_string(username, max_length=80)
+            if not InputValidator.validate_username(username):
+                raise ValueError("Invalid username format")
+        except ValueError as e:
+            log_audit_event('login_attempt', 'failure', resource_type='authentication', details={'reason': str(e), 'username': username})
+            return render_template('login.html', error='Invalid username or password.')
+        
         users = load_users()
 
         # Log login attempt
@@ -179,6 +206,7 @@ def login():
 
         if state.get('blocked_until') and now < state['blocked_until']:
             retry_after = int((state['blocked_until'] - now).total_seconds())
+            log_audit_event('login_attempt', 'failure', resource_type='authentication', details={'reason': 'rate_limited', 'ip': ip})
             return render_template('login.html', error=f'Too many attempts. Try again in {retry_after} seconds.')
 
         # Check credentials
@@ -196,6 +224,7 @@ def login():
             with open(LOG_FILE, "a") as f:
                 f.write(log_entry)
             
+            log_audit_event('login_success', 'success', resource_type='authentication', details={'username': username, 'ip': ip})
             return redirect(url_for('dashboard'))
         else:
             log_entry = f"{timestamp} server login[failed]: username={username} from {ip} reason=invalid_credentials\n"
@@ -353,14 +382,8 @@ def logout():
 
 @app.after_request
 def set_security_headers(response):
-    # Basic security headers
-    response.headers['X-Content-Type-Options'] = 'nosniff'
-    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
-    response.headers['Referrer-Policy'] = 'no-referrer-when-downgrade'
-    response.headers['Permissions-Policy'] = 'geolocation=()'
-    # Content-Security-Policy (relaxed for templates/scripts used)
-    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:;"
-    return response
+    # Apply comprehensive security headers
+    return SecurityHeaders.apply_headers(response)
 
 
 @app.route('/favicon.ico')
