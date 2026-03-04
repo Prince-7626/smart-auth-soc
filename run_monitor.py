@@ -1,4 +1,4 @@
-from app.monitor import monitor
-
+import time
+import app.monitor
 if __name__ == "__main__":
-    monitor()
+    app.monitor.monitor()
