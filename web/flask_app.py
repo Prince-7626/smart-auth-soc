@@ -5,10 +5,24 @@ from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
+from dotenv import load_dotenv
+
+# Load environment variables
+load_dotenv()
 
 # Initialize Flask app
 app = Flask(__name__, template_folder='templates')
 app.secret_key = secrets.token_hex(32)
+
+# Database configuration
+app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///smartauth_soc.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Import and initialize database
+from app.database import db, init_db, User, BlockedIP, Incident, AuditLog
+from app.migrations import migrate_json_to_db
+
+db.init_app(app)
 
 # Session lifetime
 app.permanent_session_lifetime = timedelta(minutes=30)
@@ -29,7 +43,7 @@ USERS_FILE = os.path.join(BASE_DIR, "web", "users.json")
 # Ensure directories exist
 os.makedirs(os.path.join(BASE_DIR, "sample_logs"), exist_ok=True)
 
-# Initialize users file if it doesn't exist
+# Initialize users file if it doesn't exist (for backwards compatibility)
 def init_users():
     if not os.path.exists(USERS_FILE):
         users = {
@@ -48,6 +62,17 @@ def init_users():
             json.dump(users, f, indent=4)
 
 init_users()
+
+# Initialize database with Flask context
+with app.app_context():
+    db.create_all()
+    print("✓ Database initialized")
+    # Migrate existing JSON data to database
+    try:
+        migrate_json_to_db(app)
+    except Exception as e:
+        print(f"Note: Migration not needed or already completed")
+
 
 # Load users
 def load_users():
@@ -68,6 +93,38 @@ def load_soc_data():
         "blocked_ips": {},
         "ml_alerts": 0
     }
+
+# Audit logging helper
+def log_audit_event(action, status='success', resource_type=None, resource_id=None, details=None):
+    """Log security audit events to database"""
+    try:
+        username = session.get('username')
+        user = User.query.filter_by(username=username).first() if username else None
+        
+        audit_log = AuditLog(
+            user_id=user.id if user else None,
+            action=action,
+            resource_type=resource_type,
+            resource_id=resource_id,
+            status=status,
+            details=details,
+            source_ip=request.remote_addr,
+            user_agent=request.headers.get('User-Agent', '')[:500]
+        )
+        db.session.add(audit_log)
+        db.session.commit()
+    except Exception as e:
+        print(f"Audit logging error: {str(e)}")
+
+# API enrichment helper
+def enrich_ip_data(ip_address):
+    """Enrich IP data with geolocation and threat information"""
+    try:
+        from app.api_integrations import APIAggregator
+        return APIAggregator.enrich_threat_data(ip_address)
+    except Exception as e:
+        print(f"IP enrichment error: {str(e)}")
+        return {'ip': ip_address, 'location': 'Unknown', 'threat_score': 0, 'error': str(e)}
 
 # Authentication decorator
 def login_required(f):
