@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SMART AUTH SOC{% endblock %}</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #ffffff;
+            color: #0f1419;
+        }
+
+        /* Header/Navbar */
+        .navbar {
+            background: linear-gradient(135deg, #131921 0%, #1a2332 100%);
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .navbar-logo {
+            font-size: 24px;
+            font-weight: 700;
+            background: linear-gradient(135deg, #FF9900 0%, #FF7700 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+
+        .navbar-logo span {
+            color: #FF9900;
+        }
+
+        .search-container {
+            flex: 1;
+            max-width: 500px;
+            display: flex;
+            align-items: center;
+            background: #ffffff;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .search-container input {
+            flex: 1;
+            border: none;
+            padding: 0.75rem 1rem;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .search-container button {
+            background: #FF9900;
+            border: none;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .search-container button:hover {
+            background: #FF7700;
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            margin-left: auto;
+        }
+
+        .navbar-item {
+            color: #ffffff;
+            text-decoration: none;
+            font-size: 13px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .navbar-item:hover {
+            opacity: 0.8;
+        }
+
+        .navbar-item small {
+            font-size: 11px;
+            color: #999;
+        }
+
+        .navbar-item strong {
+            color: #FF9900;
+            font-weight: 600;
+        }
+
+        .user-menu {
+            position: relative;
+            display: inline-block;
+        }
+
+        .user-menu-btn {
+            background: none;
+            border: none;
+            color: #ffffff;
+            cursor: pointer;
+            font-size: 13px;
+            padding: 0.5rem 1rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .user-menu-btn:hover {
+            opacity: 0.8;
+        }
+
+        .dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: #ffffff;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-width: 180px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+            margin-top: 0.5rem;
+            display: none;
+        }
+
+        .dropdown.active {
+            display: block;
+        }
+
+        .dropdown a {
+            display: block;
+            padding: 0.75rem 1rem;
+            color: #0f1419;
+            text-decoration: none;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+        }
+
+        .dropdown a:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown a:hover {
+            background: #f5f5f5;
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem;
+        }
+
+        /* Footer */
+        .footer {
+            background: #131921;
+            color: #ffffff;
+            margin-top: 4rem;
+            padding: 2rem 1.5rem;
+            border-top: 1px solid #333;
+        }
+
+        .footer-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .footer-section h4 {
+            margin-bottom: 1rem;
+            color: #FF9900;
+            font-size: 14px;
+        }
+
+        .footer-section a {
+            display: block;
+            color: #ccc;
+            text-decoration: none;
+            font-size: 12px;
+            margin-bottom: 0.75rem;
+            transition: color 0.2s;
+        }
+
+        .footer-section a:hover {
+            color: #FF9900;
+        }
+
+        .footer-bottom {
+            text-align: center;
+            padding-top: 2rem;
+            border-top: 1px solid #333;
+            font-size: 12px;
+            color: #999;
+        }
+
+        /* Alert/Message */
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            background: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffc107;
+        }
+
+        .alert.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-color: #f5c6cb;
+        }
+
+        .alert.success {
+            background: #d4edda;
+            color: #155724;
+            border-color: #c3e6cb;
+        }
+
+        @media (max-width: 768px) {
+            .navbar {
+                flex-wrap: wrap;
+                gap: 1rem;
+            }
+
+            .search-container {
+                order: 3;
+                flex-basis: 100%;
+                max-width: 100%;
+            }
+
+            .navbar-menu {
+                margin-left: 0;
+                flex-basis: 100%;
+                gap: 1rem;
+                justify-content: space-around;
+            }
+
+            .container {
+                padding: 1rem;
+            }
+        }
+
+        {% block extra_css %}{% endblock %}
+    </style>
+</head>
+<body>
+    <!-- Header/Navbar -->
+    <div class="navbar">
+        <a href="/dashboard" class="navbar-logo">🔐 SMART<span>AUTH</span></a>
+        
+        <div class="search-container">
+            <input type="text" placeholder="Search security services...">
+            <button type="submit">Search</button>
+        </div>
+
+        <div class="navbar-menu">
+            <a href="/incidents" class="navbar-item">
+                <small>Incidents</small>
+                <strong>Threats</strong>
+            </a>
+
+            <a href="/analytics" class="navbar-item">
+                <small>Analytics</small>
+                <strong>Reports</strong>
+            </a>
+
+            <div class="user-menu">
+                <button class="user-menu-btn" onclick="toggleUserMenu()">
+                    <small>Account</small>
+                    <strong>{{ username or 'Guest' }}</strong>
+                </button>
+                <div class="dropdown" id="userMenuDropdown">
+                    {% if username %}
+                    <a href="/profile">👤 My Account</a>
+                    {% if role == 'admin' %}
+                    <a href="/admin">⚙️ Admin Panel</a>
+                    {% endif %}
+                    <a href="/logout">🚪 Logout</a>
+                    {% else %}
+                    <a href="/login">Login</a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        {% if message %}
+        <div class="alert">{{ message }}</div>
+        {% endif %}
+
+        {% if error %}
+        <div class="alert error">{{ error }}</div>
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h4>Get Help</h4>
+                <a href="#">Documentation</a>
+                <a href="#">API Reference</a>
+                <a href="#">Support Center</a>
+                <a href="#">Contact Us</a>
+            </div>
+
+            <div class="footer-section">
+                <h4>Security</h4>
+                <a href="#">Threat Detection</a>
+                <a href="#">IP Blocking</a>
+                <a href="#">Anomaly Detection</a>
+                <a href="#">Security Reports</a>
+            </div>
+
+            <div class="footer-section">
+                <h4>Company</h4>
+                <a href="#">About Us</a>
+                <a href="#">Careers</a>
+                <a href="#">Blog</a>
+                <a href="#">Privacy Policy</a>
+            </div>
+
+            <div class="footer-section">
+                <h4>Resources</h4>
+                <a href="#">Tutorials</a>
+                <a href="#">Webinars</a>
+                <a href="#">Case Studies</a>
+                <a href="#">Community</a>
+            </div>
+        </div>
+
+        <div class="footer-bottom">
+            <p>&copy; 2026 SMART AUTH SOC. All rights reserved. | Security Operations Center</p>
+        </div>
+    </footer>
+
+    <script>
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('userMenuDropdown');
+            dropdown.classList.toggle('active');
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            const userMenu = document.querySelector('.user-menu');
+            if (!userMenu.contains(event.target)) {
+                document.getElementById('userMenuDropdown').classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>

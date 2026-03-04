@@ -1,0 +1,473 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - SMART AUTH SOC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        margin-bottom: 2rem;
+    }
+
+    .profile-header h1 {
+        font-size: 28px;
+        color: #0f1419;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-container {
+        display: grid;
+        grid-template-columns: 300px 1fr;
+        gap: 2rem;
+    }
+
+    /* Profile Sidebar */
+    .profile-sidebar {
+        background: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 2rem;
+        text-align: center;
+        height: fit-content;
+    }
+
+    .profile-avatar {
+        width: 100px;
+        height: 100px;
+        margin: 0 auto 1rem;
+        background: linear-gradient(135deg, #FF9900, #FF7700);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 48px;
+    }
+
+    .profile-name {
+        font-size: 18px;
+        font-weight: 600;
+        color: #0f1419;
+        margin-bottom: 0.25rem;
+    }
+
+    .profile-role {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-role-badge {
+        display: inline-block;
+        background: #fff3cd;
+        color: #997600;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-divider {
+        height: 1px;
+        background: #eee;
+        margin: 1.5rem 0;
+    }
+
+    .profile-stat {
+        margin-bottom: 1.5rem;
+    }
+
+    .profile-stat-label {
+        font-size: 11px;
+        color: #666;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .profile-stat-value {
+        font-size: 16px;
+        font-weight: 600;
+        color: #FF9900;
+    }
+
+    .logout-btn {
+        width: 100%;
+        padding: 0.75rem;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+        margin-top: 1rem;
+    }
+
+    .logout-btn:hover {
+        background: #c82333;
+    }
+
+    /* Main Content Area */
+    .profile-content {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+    }
+
+    .card {
+        background: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+
+    .card-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        color: #0f1419;
+        border-bottom: 2px solid #FF9900;
+        padding-bottom: 0.75rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-group:last-child {
+        margin-bottom: 0;
+    }
+
+    .form-label {
+        display: block;
+        font-size: 13px;
+        color: #666;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+        font-weight: 600;
+    }
+
+    .form-value {
+        font-size: 14px;
+        color: #0f1419;
+        padding: 0.75rem;
+        background: #f9f9f9;
+        border: 1px solid #eee;
+        border-radius: 4px;
+    }
+
+    .form-input {
+        font-size: 14px;
+        padding: 0.75rem;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        width: 100%;
+        transition: all 0.2s;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: #FF9900;
+        box-shadow: 0 0 0 3px rgba(255, 153, 0, 0.1);
+    }
+
+    .button-group {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1.5rem;
+    }
+
+    .btn-primary {
+        flex: 1;
+        padding: 0.75rem;
+        background: #FF9900;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .btn-primary:hover {
+        background: #FF7700;
+    }
+
+    .btn-secondary {
+        flex: 1;
+        padding: 0.75rem;
+        background: #e9ecef;
+        color: #0f1419;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: all 0.2s;
+    }
+
+    .btn-secondary:hover {
+        background: #dee2e6;
+    }
+
+    .permission-group {
+        background: #f9f9f9;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+
+    .permission-item {
+        display: flex;
+        align-items: center;
+        padding: 0.5rem 0;
+    }
+
+    .permission-check {
+        width: 20px;
+        height: 20px;
+        margin-right: 0.75rem;
+        cursor: pointer;
+    }
+
+    .permission-label {
+        font-size: 13px;
+        color: #0f1419;
+    }
+
+    .alert {
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1rem;
+    }
+
+    .alert-info {
+        background: #d1ecf1;
+        color: #0c5460;
+        border: 1px solid #bee5eb;
+    }
+
+    .alert-success {
+        background: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    @media (max-width: 768px) {
+        .profile-container {
+            grid-template-columns: 1fr;
+        }
+
+        .profile-sidebar {
+            display: flex;
+            align-items: center;
+            gap: 1.5rem;
+            text-align: left;
+        }
+
+        .profile-avatar {
+            margin: 0;
+            width: 80px;
+            height: 80px;
+            font-size: 40px;
+        }
+
+        .profile-info {
+            flex: 1;
+        }
+
+        .button-group {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Profile Header -->
+<div class="profile-header">
+    <h1>My Profile</h1>
+</div>
+
+<div class="profile-container">
+    <!-- Sidebar -->
+    <div class="profile-sidebar">
+        <div class="profile-avatar">👤</div>
+        <div>
+            <div class="profile-name" id="profile-name">Admin User</div>
+            <div class="profile-role">Security Administrator</div>
+            <div class="profile-role-badge">Administrator</div>
+            <div class="profile-divider"></div>
+            <div class="profile-stat">
+                <div class="profile-stat-label">Member Since</div>
+                <div class="profile-stat-value">2024</div>
+            </div>
+            <div class="profile-stat">
+                <div class="profile-stat-label">Sessions</div>
+                <div class="profile-stat-value">1</div>
+            </div>
+            <a href="/logout" style="text-decoration: none;">
+                <button class="logout-btn">Logout</button>
+            </a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="profile-content">
+        <!-- Account Information -->
+        <div class="card">
+            <div class="card-title">👤 Account Information</div>
+
+            <div class="form-group">
+                <label class="form-label">Username</label>
+                <div class="form-value" id="username">admin</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <div class="form-value" id="email">admin@smartauth.local</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Role</label>
+                <div class="form-value" id="role">Administrator</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Account Status</label>
+                <div class="form-value" style="color: #28a745;">✓ Active</div>
+            </div>
+        </div>
+
+        <!-- Security Settings -->
+        <div class="card">
+            <div class="card-title">🔒 Security Settings</div>
+
+            <div class="form-group">
+                <label class="form-label">Last Password Change</label>
+                <div class="form-value">2024-01-15 10:30 AM</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Active Sessions</label>
+                <div class="form-value">1 session from this browser</div>
+            </div>
+
+            <div class="form-group">
+                <label class="form-label">Two-Factor Authentication</label>
+                <div class="form-value" style="color: #666;">Not enabled</div>
+            </div>
+
+            <div class="button-group">
+                <button class="btn-primary" onclick="changePassword()">Change Password</button>
+                <button class="btn-secondary" onclick="enableTwoFactor()">Enable 2FA</button>
+            </div>
+        </div>
+
+        <!-- Permissions -->
+        <div class="card">
+            <div class="card-title">🔐 Permissions & Access</div>
+
+            <div class="alert alert-info">
+                ℹ️ As an Administrator, you have full access to all features and settings.
+            </div>
+
+            <div class="permission-group">
+                <div style="font-weight: 600; margin-bottom: 0.75rem; color: #0f1419;">Dashboard Access</div>
+                <div class="permission-item">
+                    <input type="checkbox" class="permission-check" checked disabled>
+                    <label class="permission-label">View Dashboard</label>
+                </div>
+                <div class="permission-item">
+                    <input type="checkbox" class="permission-check" checked disabled>
+                    <label class="permission-label">View Real-time Metrics</label>
+                </div>
+            </div>
+
+            <div class="permission-group">
+                <div style="font-weight: 600; margin-bottom: 0.75rem; color: #0f1419;">Incident Management</div>
+                <div class="permission-item">
+                    <input type="checkbox" class="permission-check" checked disabled>
+                    <label class="permission-label">View Incidents</label>
+                </div>
+                <div class="permission-item">
+                    <input type="checkbox" class="permission-check" checked disabled>
+                    <label class="permission-label">Create Incidents</label>
+                </div>
+                <div class="permission-item">
+                    <input type="checkbox" class="permission-check" checked disabled>
+                    <label class="permission-label">Resolve Incidents</label>
+                </div>
+            </div>
+
+            <div class="permission-group">
+                <div style="font-weight: 600; margin-bottom: 0.75rem; color: #0f1419;">Administration</div>
+                <div class="permission-item">
+                    <input type="checkbox" class="permission-check" checked disabled>
+                    <label class="permission-label">Admin Panel Access</label>
+                </div>
+                <div class="permission-item">
+                    <input type="checkbox" class="permission-check" checked disabled>
+                    <label class="permission-label">Manage Users</label>
+                </div>
+                <div class="permission-item">
+                    <input type="checkbox" class="permission-check" checked disabled>
+                    <label class="permission-label">System Configuration</label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="card">
+            <div class="card-title">📋 Recent Activity</div>
+
+            <div style="font-size: 13px; color: #666; line-height: 1.8;">
+                <div style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                    <strong>Logged In</strong> — Today at 10:15 AM from this device
+                </div>
+                <div style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                    <strong>Dashboard Viewed</strong> — Today at 10:16 AM
+                </div>
+                <div style="padding: 0.5rem 0; border-bottom: 1px solid #eee;">
+                    <strong>Admin Panel Accessed</strong> — Today at 10:20 AM
+                </div>
+                <div style="padding: 0.5rem 0;">
+                    <strong>Incidents Reviewed</strong> — Today at 10:25 AM
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function changePassword() {
+        const newPassword = prompt('Enter new password:');
+        if (newPassword) {
+            alert('Password change feature not yet implemented in demo mode');
+        }
+    }
+
+    function enableTwoFactor() {
+        alert('Two-Factor Authentication setup not yet implemented in demo mode');
+    }
+
+    // Load profile data
+    async function loadProfile() {
+        try {
+            // In production, fetch from /api/profile
+            const session = {
+                username: 'admin',
+                role: 'Administrator',
+                created_at: '2024-01-01'
+            };
+
+            document.getElementById('profile-name').textContent = session.username;
+            document.getElementById('username').textContent = session.username;
+        } catch (error) {
+            console.error('Error loading profile:', error);
+        }
+    }
+
+    loadProfile();
+</script>
+{% endblock %}

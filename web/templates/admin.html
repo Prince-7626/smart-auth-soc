@@ -1,323 +1,321 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - SMART AUTH SOC</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+{% extends "base.html" %}
+
+{% block title %}Admin Panel - SMART AUTH SOC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .admin-page-header {
+        margin-bottom: 2rem;
+    }
+
+    .admin-page-header h1 {
+        font-size: 28px;
+        margin-bottom: 0.25rem;
+        color: #0f1419;
+    }
+
+    .admin-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #FF9900 0%, #FF7700 100%);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 4px;
+        font-weight: 600;
+        font-size: 12px;
+        text-transform: uppercase;
+        margin-top: 0.5rem;
+    }
+
+    /* Admin Cards */
+    .admin-cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .admin-card {
+        background: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1.5rem;
+        text-align: center;
+    }
+
+    .admin-card h3 {
+        font-size: 12px;
+        color: #666;
+        text-transform: uppercase;
+        margin-bottom: 0.75rem;
+    }
+
+    .admin-card .value {
+        font-size: 32px;
+        font-weight: 700;
+        color: #FF9900;
+    }
+
+    /* Section Titles */
+    .section-title {
+        font-size: 20px;
+        margin-bottom: 1.5rem;
+        margin-top: 2rem;
+        color: #0f1419;
+        border-bottom: 2px solid #FF9900;
+        padding-bottom: 0.75rem;
+    }
+
+    /* Tables */
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+    }
+
+    .data-table th {
+        background: #f9f9f9;
+        border-bottom: 2px solid #FF9900;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #0f1419;
+        font-size: 13px;
+        text-transform: uppercase;
+    }
+
+    .data-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #eee;
+    }
+
+    .data-table tr:hover {
+        background: #f9f9f9;
+    }
+
+    .role-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .role-badge.admin {
+        background: #fff3cd;
+        color: #997600;
+    }
+
+    .role-badge.analyst {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .status-badge {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .config-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .config-card {
+        background: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+
+    .config-card h4 {
+        font-size: 14px;
+        margin-bottom: 0.75rem;
+        color: #0f1419;
+    }
+
+    .config-card p {
+        font-size: 13px;
+        color: #666;
+        line-height: 1.5;
+    }
+
+    .warning-box {
+        background: #fff3cd;
+        border-left: 4px solid #FF9900;
+        padding: 1rem;
+        border-radius: 4px;
+        margin-bottom: 1.5rem;
+        font-size: 13px;
+        color: #997600;
+    }
+
+    @media (max-width: 768px) {
+        .admin-cards-grid {
+            grid-template-columns: 1fr;
         }
 
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #16213e 100%);
-            color: #fff;
-            min-height: 100vh;
+        .config-grid {
+            grid-template-columns: 1fr;
         }
+    }
+</style>
+{% endblock %}
 
-        .navbar {
-            background: rgba(15, 15, 30, 0.95);
-            border-bottom: 2px solid #00d4ff;
-            padding: 1rem 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+{% block content %}
+<!-- Admin Page Header -->
+<div class="admin-page-header">
+    <h1>Administration Panel</h1>
+    <span class="admin-badge">⚙️ Admin Tools</span>
+</div>
 
-        .navbar h1 {
-            font-size: 24px;
-            background: linear-gradient(135deg, #00d4ff, #0099ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 2rem;
-        }
-
-        .admin-badge {
-            background: linear-gradient(135deg, #ff6600, #ff3333);
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 12px;
-        }
-
-        .header {
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header h2 {
-            font-size: 32px;
-        }
-
-        .section {
-            background: rgba(30, 30, 50, 0.8);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .section h3 {
-            color: #00d4ff;
-            margin-bottom: 1rem;
-            border-bottom: 2px solid rgba(0, 212, 255, 0.2);
-            padding-bottom: 0.5rem;
-            font-size: 18px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .table-wrapper {
-            overflow-x: auto;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        table th {
-            background: rgba(0, 212, 255, 0.1);
-            color: #00d4ff;
-            padding: 1rem;
-            text-align: left;
-            font-weight: 700;
-            text-transform: uppercase;
-            font-size: 12px;
-            letter-spacing: 1px;
-            border: 1px solid rgba(0, 212, 255, 0.2);
-        }
-
-        table td {
-            padding: 1rem;
-            border: 1px solid rgba(0, 212, 255, 0.1);
-            color: #ccc;
-        }
-
-        table tr:hover {
-            background: rgba(0, 212, 255, 0.05);
-        }
-
-        .admin-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .admin-card {
-            background: rgba(30, 30, 50, 0.8);
-            border: 1px solid rgba(0, 212, 255, 0.3);
-            border-radius: 10px;
-            padding: 1.5rem;
-            text-align: center;
-        }
-
-        .admin-card h3 {
-            color: #00d4ff;
-            margin-bottom: 0.5rem;
-            font-size: 14px;
-            text-transform: uppercase;
-        }
-
-        .admin-card .value {
-            font-size: 32px;
-            font-weight: 700;
-            background: linear-gradient(135deg, #00d4ff, #0099ff);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .role-badge {
-            display: inline-block;
-            padding: 0.35rem 0.7rem;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-
-        .role-admin {
-            background: rgba(255, 100, 0, 0.2);
-            color: #ff9900;
-        }
-
-        .role-analyst {
-            background: rgba(0, 212, 255, 0.2);
-            color: #00d4ff;
-        }
-
-        .back-link {
-            color: #00d4ff;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-
-        .back-link:hover {
-            color: #0099ff;
-        }
-
-        .warning-box {
-            background: rgba(255, 150, 0, 0.1);
-            border-left: 4px solid #ff9900;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
-            font-size: 13px;
-        }
-    </style>
-</head>
-<body>
-    <div class="navbar">
-        <h1>🔐 SMART AUTH SOC</h1>
-        <div class="admin-badge">⚙️ ADMIN PANEL</div>
+<!-- Admin Stats Cards -->
+<div class="admin-cards-grid">
+    <div class="admin-card">
+        <h3>Total Users</h3>
+        <div class="value" id="user-count">--</div>
     </div>
 
-    <div class="container">
-        <div class="header">
-            <div>
-                <h2>Administration</h2>
-                <p style="color: #888; margin-top: 0.5rem;"><a href="/dashboard" class="back-link">← Back to Dashboard</a></p>
-            </div>
-        </div>
-
-        <div class="admin-grid">
-            <div class="admin-card">
-                <h3>Total Users</h3>
-                <div class="value" id="user-count">--</div>
-            </div>
-
-            <div class="admin-card">
-                <h3>Active Sessions</h3>
-                <div class="value">1</div>
-            </div>
-
-            <div class="admin-card">
-                <h3>System Status</h3>
-                <div class="value" style="color: #00ff00; background: linear-gradient(135deg, #00ff00, #00aa00); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">✓</div>
-            </div>
-        </div>
-
-        <div class="section">
-            <h3>📋 System Configuration</h3>
-            <div class="warning-box">
-                ⚠️ <strong>System in Development Mode</strong> - Some features are simulation only. In production, connect to real authentication logs and security systems.
-            </div>
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Parameter</th>
-                            <th>Value</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td>ML Engine</td>
-                            <td>Scikit-learn</td>
-                            <td><span style="color: #00ff00;">✓ Enabled</span></td>
-                        </tr>
-                        <tr>
-                            <td>GeoIP Lookup</td>
-                            <td>IP-API</td>
-                            <td><span style="color: #00ff00;">✓ Enabled</span></td>
-                        </tr>
-                        <tr>
-                            <td>Log Monitoring</td>
-                            <td>Real-time Stream</td>
-                            <td><span style="color: #00ff00;">✓ Enabled</span></td>
-                        </tr>
-                        <tr>
-                            <td>Database</td>
-                            <td>JSON (Local)</td>
-                            <td><span style="color: #ffaa00;">⚠ Demo</span></td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="section">
-            <h3>👥 User Management</h3>
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Username</th>
-                            <th>Role</th>
-                            <th>Created</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="users-table">
-                        <tr>
-                            <td colspan="4" style="text-align: center; color: #888;">Loading...</td>
-                        </tr>
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <div class="section">
-            <h3>🔒 Security Settings</h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem;">
-                <div style="padding: 1rem; background: rgba(0, 212, 255, 0.05); border-radius: 5px;">
-                    <strong>Password Requirements</strong>
-                    <p style="color: #888; font-size: 12px; margin-top: 0.5rem;">Min 8 characters, 1 uppercase, 1 number</p>
-                </div>
-                <div style="padding: 1rem; background: rgba(0, 212, 255, 0.05); border-radius: 5px;">
-                    <strong>Session Timeout</strong>
-                    <p style="color: #888; font-size: 12px; margin-top: 0.5rem;">30 minutes of inactivity</p>
-                </div>
-                <div style="padding: 1rem; background: rgba(0, 212, 255, 0.05); border-radius: 5px;">
-                    <strong>Log Retention</strong>
-                    <p style="color: #888; font-size: 12px; margin-top: 0.5rem;">90 days minimum</p>
-                </div>
-            </div>
-        </div>
+    <div class="admin-card">
+        <h3>Active Sessions</h3>
+        <div class="value">1</div>
     </div>
 
-    <script>
-        async function loadUsers() {
-            try {
-                const response = await fetch('/api/users');
-                const users = await response.json();
-                
-                const tbody = document.getElementById('users-table');
-                tbody.innerHTML = '';
-                
-                users.forEach(user => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><strong>${user.username}</strong></td>
-                        <td><span class="role-badge role-${user.role.toLowerCase()}">${user.role}</span></td>
-                        <td>${user.created_at.substring(0, 10)}</td>
-                        <td><span style="color: #00ff00;">✓ Active</span></td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                
-                document.getElementById('user-count').textContent = users.length;
-            } catch (error) {
-                console.error('Error loading users:', error);
-            }
-        }
+    <div class="admin-card">
+        <h3>System Status</h3>
+        <div class="value" style="color: #28a745;">✓</div>
+    </div>
+</div>
 
-        loadUsers();
-    </script>
-</body>
-</html>
+<!-- System Configuration -->
+<h2 class="section-title">📋 System Configuration</h2>
+<div class="warning-box">
+    ⚠️ <strong>Development Mode Active</strong> — Some features are simulation only. In production, connect to real authentication logs and security systems.
+</div>
+
+<table class="data-table">
+    <thead>
+        <tr>
+            <th>Component</th>
+            <th>Service</th>
+            <th>Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><strong>ML Engine</strong></td>
+            <td>Scikit-learn Isolation Forest</td>
+            <td><span class="status-badge">✓ Enabled</span></td>
+        </tr>
+        <tr>
+            <td><strong>GeoIP Lookup</strong></td>
+            <td>IP-API Service</td>
+            <td><span class="status-badge">✓ Enabled</span></td>
+        </tr>
+        <tr>
+            <td><strong>Log Monitoring</strong></td>
+            <td>Real-time Stream Analysis</td>
+            <td><span class="status-badge">✓ Enabled</span></td>
+        </tr>
+        <tr>
+            <td><strong>Database</strong></td>
+            <td>JSON (Local File)</td>
+            <td><span class="status-badge">✓ Enabled</span></td>
+        </tr>
+    </tbody>
+</table>
+
+<!-- User Management -->
+<h2 class="section-title">👥 User Management</h2>
+<div style="overflow-x: auto;">
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Created</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody id="users-table">
+            <tr>
+                <td colspan="4" style="text-align: center; color: #999;">Loading...</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
+<!-- Security Settings -->
+<h2 class="section-title">🔒 Security Settings</h2>
+<div class="config-grid">
+    <div class="config-card">
+        <h4>🔑 Password Requirements</h4>
+        <p>Minimum 8 characters, 1 uppercase letter, 1 number required for all accounts.</p>
+    </div>
+
+    <div class="config-card">
+        <h4>⏱️ Session Timeout</h4>
+        <p>User sessions automatically expire after 30 minutes of inactivity for security.</p>
+    </div>
+
+    <div class="config-card">
+        <h4>📝 Log Retention</h4>
+        <p>Authentication and security logs retained for minimum 90 days.</p>
+    </div>
+
+    <div class="config-card">
+        <h4>🚫 Login Rate Limiting</h4>
+        <p>Maximum 6 failed login attempts per 15 minutes. Blocks IP for 10 minutes.</p>
+    </div>
+
+    <div class="config-card">
+        <h4>🛡️ Security Headers</h4>
+        <p>CSP, X-Frame-Options, X-Content-Type-Options enabled on all responses.</p>
+    </div>
+
+    <div class="config-card">
+        <h4>📊 Dashboard Refresh</h4>
+        <p>Metrics auto-refresh every 10 seconds for real-time monitoring view.</p>
+    </div>
+</div>
+
+<script>
+    async function loadUsers() {
+        try {
+            const response = await fetch('/api/users');
+            const users = await response.json();
+            
+            const tbody = document.getElementById('users-table');
+            tbody.innerHTML = '';
+            
+            users.forEach(user => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${user.username}</strong></td>
+                    <td><span class="role-badge ${user.role.toLowerCase()}">${user.role}</span></td>
+                    <td>${user.created_at.substring(0, 10)}</td>
+                    <td><span class="status-badge">✓ Active</span></td>
+                `;
+                tbody.appendChild(row);
+            });
+            
+            document.getElementById('user-count').textContent = users.length;
+        } catch (error) {
+            console.error('Error loading users:', error);
+        }
+    }
+
+    loadUsers();
+</script>
+{% endblock %}

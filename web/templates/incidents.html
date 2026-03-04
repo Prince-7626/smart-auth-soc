@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+
+{% block title %}Incidents - SMART AUTH SOC{% endblock %}
+
+{% block extra_css %}
+<style>
+    .incidents-header {
+        margin-bottom: 2rem;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .incidents-header h1 {
+        font-size: 28px;
+        color: #0f1419;
+    }
+
+    .filter-buttons {
+        display: flex;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+    }
+
+    .filter-btn {
+        padding: 0.5rem 1rem;
+        border: 2px solid #ddd;
+        background: white;
+        color: #0f1419;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .filter-btn:hover {
+        border-color: #FF9900;
+        color: #FF9900;
+    }
+
+    .filter-btn.active {
+        background: #FF9900;
+        color: white;
+        border-color: #FF9900;
+    }
+
+    .incidents-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .incident-card {
+        background: #ffffff;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        transition: all 0.3s;
+    }
+
+    .incident-card:hover {
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        border-color: #FF9900;
+        transform: translateY(-4px);
+    }
+
+    .incident-header {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #FF9900 0%, #FF7700 100%);
+        color: white;
+    }
+
+    .incident-id {
+        font-size: 12px;
+        opacity: 0.9;
+        margin-bottom: 0.5rem;
+    }
+
+    .incident-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin-bottom: 0.75rem;
+    }
+
+    .severity-label {
+        display: inline-block;
+        padding: 0.25rem 0.75rem;
+        background: rgba(255,255,255,0.2);
+        border-radius: 20px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .incident-body {
+        padding: 1.5rem;
+    }
+
+    .incident-detail {
+        margin-bottom: 1rem;
+    }
+
+    .incident-detail-label {
+        font-size: 11px;
+        color: #666;
+        text-transform: uppercase;
+        margin-bottom: 0.25rem;
+        font-weight: 600;
+    }
+
+    .incident-detail-value {
+        font-size: 13px;
+        color: #0f1419;
+    }
+
+    .ip-address {
+        font-family: 'Courier New', monospace;
+        background: #f5f5f5;
+        padding: 0.25rem 0.5rem;
+        border-radius: 2px;
+        font-size: 12px;
+    }
+
+    .incident-status {
+        display: inline-block;
+        padding: 0.35rem 0.75rem;
+        border-radius: 4px;
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+    }
+
+    .incident-status.critical {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    .incident-status.high {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .incident-status.medium {
+        background: #d1ecf1;
+        color: #0c5460;
+    }
+
+    .incident-status.low {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .incident-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid #eee;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 12px;
+        color: #666;
+    }
+
+    .incident-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+
+    .incident-action-btn {
+        background: #f5f5f5;
+        border: none;
+        padding: 0.4rem 0.8rem;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.2s;
+    }
+
+    .incident-action-btn:hover {
+        background: #FF9900;
+        color: white;
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 3rem 1rem;
+        color: #999;
+    }
+
+    .empty-state-icon {
+        font-size: 48px;
+        margin-bottom: 1rem;
+    }
+
+    @media (max-width: 768px) {
+        .incidents-header {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 1rem;
+        }
+
+        .filter-buttons {
+            width: 100%;
+        }
+
+        .incidents-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="incidents-header">
+    <h1>Security Incidents</h1>
+    <div class="filter-buttons">
+        <button class="filter-btn active" onclick="filterIncidents('all')">All</button>
+        <button class="filter-btn" onclick="filterIncidents('critical')">🔴 Critical</button>
+        <button class="filter-btn" onclick="filterIncidents('high')">🟠 High</button>
+        <button class="filter-btn" onclick="filterIncidents('medium')">🟡 Medium</button>
+        <button class="filter-btn" onclick="filterIncidents('low')">🟢 Low</button>
+    </div>
+</div>
+
+<!-- Incidents Grid -->
+<div class="incidents-grid" id="incidents-container">
+    <div class="empty-state">
+        <div class="empty-state-icon">✓</div>
+        <p>No incidents detected</p>
+    </div>
+</div>
+
+<script>
+    let allIncidents = [];
+    let currentFilter = 'all';
+
+    async function loadIncidents() {
+        try {
+            // Simulate incident data - connect to real API in production
+            const incidents = [
+                {
+                    id: 'INC-2024-0001',
+                    title: 'Brute Force Attack - Failed Logins',
+                    severity: 'critical',
+                    ip: '192.168.1.100',
+                    location: 'Unknown',
+                    attempts: 45,
+                    timestamp: new Date().toISOString(),
+                    status: 'Open'
+                },
+                {
+                    id: 'INC-2024-0002',
+                    title: 'Suspicious Login from New Location',
+                    severity: 'high',
+                    ip: '10.0.0.50',
+                    location: 'New York, US',
+                    attempts: 3,
+                    timestamp: new Date(Date.now() - 3600000).toISOString(),
+                    status: 'Under Investigation'
+                },
+                {
+                    id: 'INC-2024-0003',
+                    title: 'Multiple Failed Authentication Attempts',
+                    severity: 'high',
+                    ip: '172.16.0.25',
+                    location: 'Los Angeles, US',
+                    attempts: 8,
+                    timestamp: new Date(Date.now() - 7200000).toISOString(),
+                    status: 'Blocked'
+                },
+                {
+                    id: 'INC-2024-0004',
+                    title: 'Anomaly Detected in User Behavior',
+                    severity: 'medium',
+                    ip: '203.0.113.45',
+                    location: 'London, UK',
+                    attempts: 2,
+                    timestamp: new Date(Date.now() - 14400000).toISOString(),
+                    status: 'Monitoring'
+                },
+                {
+                    id: 'INC-2024-0005',
+                    title: 'Automated Bot Detection',
+                    severity: 'medium',
+                    ip: '198.51.100.30',
+                    location: 'Singapore',
+                    attempts: 12,
+                    timestamp: new Date(Date.now() - 86400000).toISOString(),
+                    status: 'Resolved'
+                }
+            ];
+
+            allIncidents = incidents;
+            renderIncidents();
+        } catch (error) {
+            console.error('Error loading incidents:', error);
+        }
+    }
+
+    function filterIncidents(severity) {
+        currentFilter = severity;
+        
+        // Update button states
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        event.target.classList.add('active');
+
+        renderIncidents();
+    }
+
+    function renderIncidents() {
+        const container = document.getElementById('incidents-container');
+        
+        let filtered = allIncidents;
+        if (currentFilter !== 'all') {
+            filtered = allIncidents.filter(i => i.severity === currentFilter);
+        }
+
+        if (filtered.length === 0) {
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-state-icon">✓</div>
+                    <p>No incidents in this category</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = filtered.map(incident => `
+            <div class="incident-card">
+                <div class="incident-header">
+                    <div class="incident-id">${incident.id}</div>
+                    <div class="incident-title">${incident.title}</div>
+                    <span class="severity-label">${incident.severity}</span>
+                </div>
+
+                <div class="incident-body">
+                    <div class="incident-detail">
+                        <div class="incident-detail-label">Attack Source</div>
+                        <div class="incident-detail-value">
+                            <span class="ip-address">${incident.ip}</span>
+                        </div>
+                    </div>
+
+                    <div class="incident-detail">
+                        <div class="incident-detail-label">Location</div>
+                        <div class="incident-detail-value">${incident.location}</div>
+                    </div>
+
+                    <div class="incident-detail">
+                        <div class="incident-detail-label">Attempts</div>
+                        <div class="incident-detail-value">${incident.attempts}</div>
+                    </div>
+
+                    <div class="incident-detail">
+                        <div class="incident-detail-label">Detected</div>
+                        <div class="incident-detail-value">${new Date(incident.timestamp).toLocaleString()}</div>
+                    </div>
+                </div>
+
+                <div class="incident-footer">
+                    <span class="incident-status ${incident.severity}">${incident.status}</span>
+                    <div class="incident-actions">
+                        <button class="incident-action-btn">View Details</button>
+                        <button class="incident-action-btn">Investigate</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    // Load incidents on page load
+    loadIncidents();
+</script>
+{% endblock %}
