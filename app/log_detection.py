@@ -264,8 +264,10 @@ class LogDetectionEngine:
         
         # Store as incident in database
         try:
+            import uuid
+            unique_suffix = uuid.uuid4().hex[:8]
             incident = Incident(
-                incident_id=f"INC-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{hash(ip_address) % 10000}",
+                incident_id=f"INC-{datetime.utcnow().strftime('%Y%m%d%H%M%S')}-{unique_suffix}",
                 title=f"{detection_type}: {description[:60]}",
                 severity=severity,
                 status='OPEN',
