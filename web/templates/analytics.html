@@ -305,34 +305,22 @@
     <div class="chart-grid">
         <div class="chart-card">
             <div class="chart-title">Failed Login Attempts (24h)</div>
-            <div class="chart-placeholder">
-                📊 Security events over time<br>
-                <small style="color: #bbb; display: block; margin-top: 0.5rem;">Line chart would display here</small>
-            </div>
+            <canvas id="failedLoginsChart" style="height: 300px;"></canvas>
         </div>
 
         <div class="chart-card">
             <div class="chart-title">Incident Severity Distribution</div>
-            <div class="chart-placeholder">
-                🎯 Severity breakdown<br>
-                <small style="color: #bbb; display: block; margin-top: 0.5rem;">Pie chart would display here</small>
-            </div>
+            <canvas id="incidentSeverityChart" style="height: 300px;"></canvas>
         </div>
 
         <div class="chart-card">
             <div class="chart-title">Geographic Attack Origins</div>
-            <div class="chart-placeholder">
-                🌍 Attack sources by location<br>
-                <small style="color: #bbb; display: block; margin-top: 0.5rem;">Map visualization would display here</small>
-            </div>
+            <canvas id="geographicChart" style="height: 300px;"></canvas>
         </div>
 
         <div class="chart-card">
             <div class="chart-title">Daily Blocked IPs Trend</div>
-            <div class="chart-placeholder">
-                📉 IP blocking data<br>
-                <small style="color: #bbb; display: block; margin-top: 0.5rem;">Bar chart would display here</small>
-            </div>
+            <canvas id="blockedIpsTrendChart" style="height: 300px;"></canvas>
         </div>
     </div>
 </div>
@@ -412,5 +400,143 @@
         console.log(`Filtering analytics from ${from} to ${to}`);
         // In production, refresh charts and data based on date range
     }
+
+    // Chart.js initialization and rendering
+    let charts = {};
+
+    async function loadAndRenderCharts() {
+        try {
+            // Failed Logins Timeline (Line Chart)
+            const failedLoginsData = await fetchChartData('/api/charts/failed-logins');
+            if (failedLoginsData) {
+                const ctx = document.getElementById('failedLoginsChart').getContext('2d');
+                charts.failedLogins = new Chart(ctx, {
+                    type: 'line',
+                    data: failedLoginsData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                labels: { color: '#0f1419', font: { size: 12 } }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#eee' },
+                                ticks: { color: '#666', font: { size: 11 } }
+                            },
+                            x: {
+                                grid: { color: '#eee' },
+                                ticks: { color: '#666', font: { size: 11 } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Incident Severity Distribution (Pie Chart)
+            const severityData = await fetchChartData('/api/charts/incident-severity');
+            if (severityData) {
+                const ctx = document.getElementById('incidentSeverityChart').getContext('2d');
+                charts.severity = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: severityData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                position: 'bottom',
+                                labels: { color: '#0f1419', font: { size: 11 }, padding: 15 }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Geographic Distribution (Bar Chart)
+            const geoData = await fetchChartData('/api/charts/geographic');
+            if (geoData) {
+                const ctx = document.getElementById('geographicChart').getContext('2d');
+                charts.geographic = new Chart(ctx, {
+                    type: 'bar',
+                    data: geoData,
+                    options: {
+                        indexAxis: 'y',
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                beginAtZero: true,
+                                grid: { color: '#eee' },
+                                ticks: { color: '#666', font: { size: 11 } }
+                            },
+                            y: {
+                                grid: { display: false },
+                                ticks: { color: '#666', font: { size: 11 } }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Daily Blocked IPs Trend (Area Chart)
+            const trendData = await fetchChartData('/api/charts/blocked-ips-trend');
+            if (trendData) {
+                const ctx = document.getElementById('blockedIpsTrendChart').getContext('2d');
+                charts.trend = new Chart(ctx, {
+                    type: 'line',
+                    data: trendData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        plugins: {
+                            legend: {
+                                display: true,
+                                labels: { color: '#0f1419', font: { size: 12 } }
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: { color: '#eee' },
+                                ticks: { color: '#666', font: { size: 11 } }
+                            },
+                            x: {
+                                grid: { color: '#eee' },
+                                ticks: { color: '#666', font: { size: 11 } }
+                            }
+                        }
+                    }
+                });
+            }
+        } catch (error) {
+            console.error('Error loading charts:', error);
+        }
+    }
+
+    async function fetchChartData(endpoint) {
+        try {
+            const response = await fetch(endpoint);
+            if (!response.ok) {
+                console.error(`Failed to fetch ${endpoint}: ${response.status}`);
+                return null;
+            }
+            return await response.json();
+        } catch (error) {
+            console.error(`Error fetching chart data from ${endpoint}:`, error);
+            return null;
+        }
+    }
+
+    // Initialize charts when page loads
+    document.addEventListener('DOMContentLoaded', loadAndRenderCharts);
 </script>
 {% endblock %}

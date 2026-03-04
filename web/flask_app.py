@@ -25,6 +25,7 @@ from app.security import (
     InputValidator, CSRFProtection, RateLimiter, 
     SecurityHeaders, APIAuth, require_api_key, rate_limit
 )
+from app.charts import ChartDataGenerator
 
 db.init_app(app)
 
@@ -365,6 +366,76 @@ def api_users():
             'created_at': data.get('created_at', 'Unknown')
         })
     return jsonify(user_list)
+
+# Chart API Endpoints
+@app.route('/api/charts/failed-logins')
+@login_required
+def api_failed_logins():
+    """Get failed login attempts timeline data for Chart.js"""
+    try:
+        hours = request.args.get('hours', 24, type=int)
+        chart_data = ChartDataGenerator.get_failed_logins_timeline(hours)
+        return jsonify(chart_data)
+    except Exception as e:
+        app.logger.error(f"Error generating failed logins chart: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/charts/incident-severity')
+@login_required
+def api_incident_severity():
+    """Get incident severity distribution data for Chart.js"""
+    try:
+        chart_data = ChartDataGenerator.get_incident_severity_distribution()
+        return jsonify(chart_data)
+    except Exception as e:
+        app.logger.error(f"Error generating severity chart: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/charts/blocked-ips-trend')
+@login_required
+def api_blocked_ips_trend():
+    """Get daily blocked IPs trend data for Chart.js"""
+    try:
+        days = request.args.get('days', 7, type=int)
+        chart_data = ChartDataGenerator.get_daily_blocked_ips(days)
+        return jsonify(chart_data)
+    except Exception as e:
+        app.logger.error(f"Error generating blocked IPs trend chart: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/charts/geographic')
+@login_required
+def api_geographic_distribution():
+    """Get geographic attack distribution data for Chart.js"""
+    try:
+        chart_data = ChartDataGenerator.get_geographic_distribution()
+        return jsonify(chart_data)
+    except Exception as e:
+        app.logger.error(f"Error generating geographic chart: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/charts/top-sources')
+@login_required
+def api_top_sources():
+    """Get top attack sources data for Chart.js"""
+    try:
+        limit = request.args.get('limit', 10, type=int)
+        chart_data = ChartDataGenerator.get_top_attack_sources(limit)
+        return jsonify(chart_data)
+    except Exception as e:
+        app.logger.error(f"Error generating top sources chart: {e}")
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/metrics/summary')
+@login_required
+def api_metrics_summary():
+    """Get security metrics summary"""
+    try:
+        metrics = ChartDataGenerator.get_security_metrics_summary()
+        return jsonify(metrics)
+    except Exception as e:
+        app.logger.error(f"Error generating metrics summary: {e}")
+        return jsonify({'error': str(e)}), 500
 
 @app.route('/logout')
 def logout():
