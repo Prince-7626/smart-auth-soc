@@ -302,6 +302,16 @@ This project is for educational and demonstration purposes.
 For issues or questions, please check the documentation or create an issue in the repository.
 
 ---
+## 👨‍💻 Author
+
+**Prince Kashyap**
+
+🎓 MCA (Hons.) AI/ML Student – Lovely Professional University  
+🔐 Cybersecurity & Ethical Hacking Enthusiast  
+💻 Interested in SOC Operations, Threat Detection & Security Automation
+
+- GitHub: https://github.com/Prince-7626
+- Email: prince201kashyap@gmail.com
 
 **Status**: ✅ Complete & Production-Ready for Demo  
 **Last Updated**: March 4, 2026  
