@@ -38,7 +38,7 @@
     }
 
     .metric-card:hover {
-        box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
         border-color: #FF9900;
     }
 
@@ -93,7 +93,7 @@
     }
 
     .service-card:hover {
-        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         border-color: #FF9900;
         transform: translateY(-4px);
     }
@@ -341,7 +341,8 @@
     gap: 1.5rem;
 ">
     <div style="text-align: center; padding: 1rem;">
-        <div style="font-size: 28px; font-weight: bold; color: #dc3545; margin-bottom: 0.5rem;" id="threatCritical">0</div>
+        <div style="font-size: 28px; font-weight: bold; color: #dc3545; margin-bottom: 0.5rem;" id="threatCritical">0
+        </div>
         <div style="color: #666; font-size: 13px;">Critical Threats</div>
     </div>
     <div style="text-align: center; padding: 1rem;">
@@ -349,11 +350,13 @@
         <div style="color: #666; font-size: 13px;">High Severity</div>
     </div>
     <div style="text-align: center; padding: 1rem;">
-        <div style="font-size: 28px; font-weight: bold; color: #FF9900; margin-bottom: 0.5rem;" id="threatMedium">0</div>
+        <div style="font-size: 28px; font-weight: bold; color: #FF9900; margin-bottom: 0.5rem;" id="threatMedium">0
+        </div>
         <div style="color: #666; font-size: 13px;">Medium Risk</div>
     </div>
     <div style="text-align: center; padding: 1rem;">
-        <div style="font-size: 28px; font-weight: bold; color: #17a2b8; margin-bottom: 0.5rem;" id="detectionStatus">ACTIVE</div>
+        <div style="font-size: 28px; font-weight: bold; color: #17a2b8; margin-bottom: 0.5rem;" id="detectionStatus">
+            ACTIVE</div>
         <div style="color: #666; font-size: 13px;">Detection Status</div>
     </div>
 </div>
@@ -361,42 +364,42 @@
 <style>
     .detection-summary {
         background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     }
 </style>
 
-    <div class="service-card">
-        <div class="service-card-header">📍</div>
-        <div class="service-card-content">
-            <div class="service-card-title">GeoIP Tracking</div>
-            <div class="service-card-desc">Geographical location tracking of attack sources</div>
-            <div class="service-card-footer">
-                <span class="service-status">✓ Active</span>
-            </div>
+<div class="service-card">
+    <div class="service-card-header">📍</div>
+    <div class="service-card-content">
+        <div class="service-card-title">GeoIP Tracking</div>
+        <div class="service-card-desc">Geographical location tracking of attack sources</div>
+        <div class="service-card-footer">
+            <span class="service-status">✓ Active</span>
         </div>
     </div>
+</div>
 
-    <div class="service-card">
-        <div class="service-card-header">📊</div>
-        <div class="service-card-content">
-            <div class="service-card-title">Analytics</div>
-            <div class="service-card-desc">Comprehensive security metrics and historical analysis</div>
-            <div class="service-card-footer">
-                <span class="service-status">✓ Active</span>
-            </div>
+<div class="service-card">
+    <div class="service-card-header">📊</div>
+    <div class="service-card-content">
+        <div class="service-card-title">Analytics</div>
+        <div class="service-card-desc">Comprehensive security metrics and historical analysis</div>
+        <div class="service-card-footer">
+            <span class="service-status">✓ Active</span>
         </div>
     </div>
+</div>
 
-    <div class="service-card">
-        <div class="service-card-header">⚡</div>
-        <div class="service-card-content">
-            <div class="service-card-title">Real-time Updates</div>
-            <div class="service-card-desc">Live threat notifications and instant updates</div>
-            <div class="service-card-footer">
-                <span class="service-status">✓ Active</span>
-            </div>
+<div class="service-card">
+    <div class="service-card-header">⚡</div>
+    <div class="service-card-content">
+        <div class="service-card-title">Real-time Updates</div>
+        <div class="service-card-desc">Live threat notifications and instant updates</div>
+        <div class="service-card-footer">
+            <span class="service-status">✓ Active</span>
         </div>
     </div>
+</div>
 </div>
 
 <!-- Recent Threats -->
@@ -442,14 +445,14 @@
                 document.getElementById('metric-anomalies').textContent = data.ml_alerts;
             })
             .catch(error => console.error('Error:', error));
-        
+
         // Load threat detection summary
         fetch('/api/detection/summary')
             .then(response => response.json())
             .then(data => {
                 const totalThreats = (data.critical_incidents || 0) + (data.high_incidents || 0);
                 document.getElementById('metric-threats').textContent = totalThreats;
-                
+
                 // Update detection summary section
                 document.getElementById('threatCritical').textContent = data.critical_incidents || 0;
                 document.getElementById('threatHigh').textContent = data.high_incidents || 0;
@@ -460,7 +463,42 @@
 
     }
 
-    // Refresh every 10 seconds
-    setInterval(refreshMetrics, 10000);
+    // Initial data load
+    refreshMetrics();
+
+    // Setup WebSocket connection
+    const socket = io();
+
+    socket.on('connect', function () {
+        console.log('Connected to real-time metrics stream');
+    });
+
+    socket.on('metrics_update', function (data) {
+        document.getElementById('metric-failed').textContent = data.total_failed;
+        document.getElementById('metric-ips').textContent = data.unique_ips;
+        document.getElementById('metric-blocked').textContent = data.blocked_ips;
+        document.getElementById('metric-anomalies').textContent = data.ml_alerts;
+    });
+
+    socket.on('new_threat', function (data) {
+        const tbody = document.querySelector('.threats-table tbody');
+        if (tbody) {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td><span class="ip-address">${data.ip}</span></td>
+                <td><span class="severity-badge ${data.severity.toLowerCase()}">${data.severity}</span></td>
+                <td>Just now</td>
+                <td>${data.location || 'Unknown'}</td>
+            `;
+            tbody.insertBefore(row, tbody.firstChild);
+
+            // Increment active threats counter
+            let threatsEl = document.getElementById('metric-threats');
+            threatsEl.textContent = parseInt(threatsEl.textContent) + 1;
+        } else {
+            // Re-fetch or reload to show the newly created table if it was previously empty
+            location.reload();
+        }
+    });
 </script>
 {% endblock %}

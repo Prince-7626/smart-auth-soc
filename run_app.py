@@ -6,13 +6,14 @@ Production-ready Security Operations Center Dashboard
 
 import sys
 import os
+import threading
+import webbrowser
 
 # Ensure imports work correctly
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE_DIR)
 
-# Import the Flask app
-from web.flask_app import app
+from web.flask_app import app, socketio, start_monitor
 
 if __name__ == '__main__':
     print("\n" + "="*70)
@@ -26,7 +27,9 @@ if __name__ == '__main__':
     print("="*70 + "\n")
     
     try:
-        app.run(host='127.0.0.1', port=5000, debug=True)
+        socketio.start_background_task(start_monitor)
+        threading.Timer(1.5, lambda: webbrowser.open_new("http://localhost:5000")).start()
+        socketio.run(app, host='127.0.0.1', port=5000, debug=True, use_reloader=False)
     except KeyboardInterrupt:
         print("\n\n⏹️  Shutting down...")
         sys.exit(0)

@@ -151,3 +151,16 @@ def get_database_url():
     else:
         # Use SQLite in development
         return 'sqlite:///smartauth_soc.db'
+
+from sqlalchemy import engine, event
+@event.listens_for(engine.Engine, "connect")
+def set_sqlite_pragma(dbapi_connection, connection_record):
+    if type(dbapi_connection) is getattr(dbapi_connection, "sqlite_version_info", None):
+        return
+    try:
+        cursor = dbapi_connection.cursor()
+        cursor.execute("PRAGMA journal_mode=WAL")
+        cursor.execute("PRAGMA synchronous=NORMAL")
+        cursor.close()
+    except Exception:
+        pass

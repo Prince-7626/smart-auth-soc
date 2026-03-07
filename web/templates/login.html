@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -28,7 +29,7 @@
 
         .login-card {
             background: #ffffff;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             border-radius: 12px;
             padding: 2.5rem;
         }
@@ -183,6 +184,7 @@
         }
     </style>
 </head>
+
 <body>
     <div class="login-container">
         <div class="login-card">
@@ -196,36 +198,24 @@
                 {% if csrf_token %}
                 <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
                 {% endif %}
-                
+
                 <div class="form-group">
                     <label class="form-label">Username</label>
-                    <input 
-                        type="text" 
-                        name="username" 
-                        class="form-control" 
-                        placeholder="Enter your username"
-                        required
-                        autocomplete="username"
-                    >
+                    <input type="text" name="username" class="form-control" placeholder="Enter your username" required
+                        autocomplete="username">
                     <div class="error-message">Please enter a valid username</div>
                 </div>
 
                 <div class="form-group">
                     <label class="form-label">Password</label>
-                    <input 
-                        type="password" 
-                        name="password" 
-                        class="form-control" 
-                        placeholder="Enter your password"
-                        required
-                        autocomplete="current-password"
-                    >
+                    <input type="password" name="password" class="form-control" placeholder="Enter your password"
+                        required autocomplete="current-password">
                     <div class="error-message">Incorrect password or user blocked</div>
                 </div>
 
-                {% if error_message %}
+                {% if error %}
                 <div class="security-notice">
-                    ⚠️ {{ error_message }}
+                    ⚠️ {{ error }}
                 </div>
                 {% endif %}
 
@@ -250,18 +240,20 @@
 
     <script>
         const form = document.getElementById('loginForm');
-        
-        form.addEventListener('submit', function(e) {
+
+        form.addEventListener('submit', function (e) {
             const button = form.querySelector('.login-button');
             button.disabled = true;
             button.textContent = 'Signing In...';
         });
 
         // Restore button if form returns (for errors)
-        if (document.querySelector('.error-message').textContent.trim()) {
+        const notice = document.querySelector('.security-notice');
+        if (notice && notice.textContent.trim().includes('⚠️')) {
             form.querySelector('.login-button').disabled = false;
             form.querySelector('.login-button').textContent = 'Sign In Securely';
         }
     </script>
 </body>
+
 </html>

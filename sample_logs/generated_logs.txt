@@ -1,0 +1,90 @@
+Mar 04 06:04:50 localhost sshd[12345]: authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.0.2.15
+Mar 04 09:04:50 localhost auth: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45 user=user
+Mar 04 21:04:50 localhost auth: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=172.16.0.25 user=guest
+203.0.113.99 - - [04/Mar/2026:17:09:50 +0000] "GET /api/search?q=1' AND '1'='1 HTTP/1.1" 500 17027 "-" "sqlmap/1.0"
+Mar 04 11:04:50 localhost sshd[12345]: Invalid user user from 198.51.100.23 port 22
+Mar 04 14:04:50 [FIREWALL] Connection attempt blocked: 198.51.100.44:3306
+Mar 04 21:04:50 localhost sshd[12345]: Invalid user test from 203.0.113.99 port 22
+Mar 04 04:04:50 localhost sshd[12345]: Invalid user guest from 10.0.0.100 port 22
+172.16.1.200 - - [03/Mar/2026:23:39:50 +0000] "GET /comment.php?text=<svg/onload=alert(1)> HTTP/1.1" 200 18374 "-" "Mozilla/5.0"
+Mar 04 11:04:50 localhost sshd[12345]: Invalid user test from 192.168.1.100 port 22
+Mar 04 14:04:50 [FIREWALL] Connection attempt blocked: 203.0.113.45:3306
+Mar 04 02:04:50 localhost sshd[12345]: Invalid user user from 172.16.1.200 port 22
+Mar 04 20:04:50 localhost sshd[12345]: Invalid user root from 172.16.0.25 port 22
+Mar 04 08:04:50 [FIREWALL] Connection attempt blocked: 198.51.100.44:9200
+Mar 03 22:04:50 [FIREWALL] Connection attempt blocked: 172.16.0.25:22
+192.0.2.15 - - [04/Mar/2026:14:38:50 +0000] "GET /comment.php?text=javascript:alert('xss') HTTP/1.1" 200 85954 "-" "Mozilla/5.0"
+Mar 04 11:04:50 [FIREWALL] Connection attempt blocked: 203.0.113.45:5432
+10.0.0.100 - - [04/Mar/2026:00:07:50 +0000] "GET /download/../../../etc/passwd HTTP/1.1" 200 85444 "-" "curl/7.68.0"
+172.16.0.25 - - [04/Mar/2026:10:04:50 +0000] "GET /api/search?q=admin' -- HTTP/1.1" 500 97039 "-" "sqlmap/1.0"
+192.0.2.15 - - [04/Mar/2026:01:44:50 +0000] "GET /api/search?q=1' AND '1'='1 HTTP/1.1" 200 19202 "-" "sqlmap/1.0"
+Mar 04 17:04:50 [nsm] ALERT: Possible exploit attempt from 198.51.100.44:135
+Mar 04 09:04:50 localhost sshd[12345]: Failed password for root from 192.168.1.50 port 22 ssh2
+10.0.0.100 - - [04/Mar/2026:05:39:50 +0000] "GET / HTTP/1.1" 200 21882 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+Mar 04 10:04:50 [FIREWALL] Connection attempt blocked: 10.0.0.50:139
+Mar 04 09:04:50 [FIREWALL] Connection attempt blocked: 10.0.0.50:5432
+Mar 03 23:04:50 localhost sudo: invalid: command not allowed
+Mar 04 08:04:50 localhost auth: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.168.1.100 user=admin
+Mar 04 06:04:50 [FIREWALL] Connection attempt blocked: 172.16.0.25:445
+172.16.1.200 - - [04/Mar/2026:21:58:50 +0000] "GET /comment.php?text=javascript:alert('xss') HTTP/1.1" 200 47212 "-" "Mozilla/5.0"
+Mar 04 08:04:50 [nsm] ALERT: Possible exploit attempt from 192.0.2.15:3306
+10.0.0.50 - - [04/Mar/2026:14:29:50 +0000] "GET /download/..\..\..\boot.ini HTTP/1.1" 200 93137 "-" "curl/7.68.0"
+Mar 04 03:04:50 localhost auth: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=172.16.1.200 user=guest
+Mar 03 22:04:50 localhost sshd[12345]: Failed password for invalid from 192.168.1.50 port 22 ssh2
+172.16.0.25 - - [04/Mar/2026:05:02:50 +0000] "GET /dashboard HTTP/1.1" 200 55791 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+Mar 04 03:04:50 localhost sshd[12345]: authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=203.0.113.45
+203.0.113.45 - - [04/Mar/2026:13:50:50 +0000] "GET / HTTP/1.1" 200 13014 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+203.0.113.45 - - [04/Mar/2026:07:13:50 +0000] "GET /download/....//....//....//etc/passwd HTTP/1.1" 404 4222 "-" "curl/7.68.0"
+10.0.0.100 - - [04/Mar/2026:03:36:50 +0000] "GET /download/../../..\windows\system32\config\sam HTTP/1.1" 200 89390 "-" "curl/7.68.0"
+Mar 04 01:04:50 [FIREWALL] Connection attempt blocked: 192.0.2.15:3306
+10.0.0.100 - - [04/Mar/2026:21:59:50 +0000] "GET /api/search?q=1 UNION SELECT * FROM users HTTP/1.1" 200 29264 "-" "sqlmap/1.0"
+10.0.0.100 - - [04/Mar/2026:01:17:50 +0000] "GET /comment.php?text=<img src=x onerror='alert(1)'> HTTP/1.1" 200 1862 "-" "Mozilla/5.0"
+203.0.113.45 - - [04/Mar/2026:07:36:50 +0000] "GET /api/users HTTP/1.1" 403 35202 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+203.0.113.45 - - [04/Mar/2026:07:57:50 +0000] "GET /api/users HTTP/1.1" 404 831 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+Mar 04 15:04:50 localhost sshd[12345]: authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.168.1.50
+Mar 04 22:04:50 [nsm] ALERT: Possible exploit attempt from 192.0.2.15:135
+Mar 04 05:04:50 [FIREWALL] Connection attempt blocked: 203.0.113.99:23
+10.0.0.50 - - [04/Mar/2026:04:53:50 +0000] "GET /comment.php?text=javascript:alert('xss') HTTP/1.1" 403 5241 "-" "Mozilla/5.0"
+10.0.0.50 - - [04/Mar/2026:18:53:50 +0000] "GET /download/../../..\windows\system32\config\sam HTTP/1.1" 403 52121 "-" "curl/7.68.0"
+192.0.2.15 - - [03/Mar/2026:23:24:50 +0000] "GET /download/....//....//....//etc/passwd HTTP/1.1" 404 49128 "-" "curl/7.68.0"
+203.0.113.99 - - [03/Mar/2026:23:07:50 +0000] "GET /api/search?q=1 UNION SELECT * FROM users HTTP/1.1" 500 42331 "-" "sqlmap/1.0"
+Mar 04 11:04:50 localhost auth: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=198.51.100.23 user=admin
+192.0.2.15 - - [04/Mar/2026:14:02:50 +0000] "GET /index.php HTTP/1.1" 500 79082 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+172.16.1.200 - - [04/Mar/2026:02:00:50 +0000] "GET /api/search?q='; DROP TABLE users; -- HTTP/1.1" 200 20255 "-" "sqlmap/1.0"
+Mar 04 05:04:50 [FIREWALL] Connection attempt blocked: 203.0.113.99:27017
+Mar 04 07:04:50 [nsm] ALERT: Possible exploit attempt from 203.0.113.99:27017
+Mar 04 10:04:50 localhost sshd[12345]: Invalid user root from 203.0.113.99 port 22
+203.0.113.45 - - [04/Mar/2026:04:22:50 +0000] "GET /index.php HTTP/1.1" 403 38488 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+Mar 04 20:04:50 localhost sshd[12345]: Failed password for unknown from 172.16.1.200 port 22 ssh2
+Mar 04 10:04:50 localhost sudo: guest: command not allowed
+Mar 04 22:04:50 localhost sshd[12345]: Invalid user user from 192.168.1.50 port 22
+203.0.113.45 - - [04/Mar/2026:02:40:50 +0000] "GET /download/../../..\windows\system32\config\sam HTTP/1.1" 200 48027 "-" "curl/7.68.0"
+192.168.1.50 - - [04/Mar/2026:22:02:50 +0000] "GET /download/../../../etc/passwd HTTP/1.1" 200 61122 "-" "curl/7.68.0"
+Mar 04 06:04:50 [FIREWALL] Connection attempt blocked: 203.0.113.99:5432
+Mar 04 01:04:50 localhost auth: pam_unix(sshd:auth): authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.168.1.100 user=root
+192.168.1.100 - - [04/Mar/2026:18:01:50 +0000] "GET /api/search?q=' OR '1'='1 HTTP/1.1" 404 25336 "-" "sqlmap/1.0"
+172.16.1.200 - - [04/Mar/2026:21:43:50 +0000] "GET /comment.php?text=<img src=x onerror='alert(1)'> HTTP/1.1" 200 8899 "-" "Mozilla/5.0"
+10.0.0.50 - - [04/Mar/2026:04:51:50 +0000] "GET /api/search?q=admin' -- HTTP/1.1" 500 22315 "-" "sqlmap/1.0"
+172.16.1.200 - - [04/Mar/2026:07:00:50 +0000] "GET /api/search?q='; DROP TABLE users; -- HTTP/1.1" 200 51251 "-" "sqlmap/1.0"
+198.51.100.44 - - [04/Mar/2026:08:18:50 +0000] "GET /api/search?q=admin' -- HTTP/1.1" 404 43411 "-" "sqlmap/1.0"
+Mar 04 00:04:50 localhost sshd[12345]: authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=10.0.0.50
+10.0.0.100 - - [04/Mar/2026:10:34:50 +0000] "GET /download/....//....//....//etc/passwd HTTP/1.1" 200 30049 "-" "curl/7.68.0"
+Mar 04 02:04:50 localhost sshd[12345]: Invalid user invalid from 203.0.113.99 port 22
+192.168.1.100 - - [04/Mar/2026:08:23:50 +0000] "GET /comment.php?text=<svg/onload=alert(1)> HTTP/1.1" 500 78730 "-" "Mozilla/5.0"
+198.51.100.23 - - [04/Mar/2026:21:25:50 +0000] "GET /api/search?q='; DROP TABLE users; -- HTTP/1.1" 404 62711 "-" "sqlmap/1.0"
+Mar 04 20:04:50 localhost sshd[12345]: Invalid user root from 192.168.1.100 port 22
+Mar 04 09:04:50 localhost sshd[12345]: authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=10.0.0.100
+Mar 04 15:04:50 [nsm] ALERT: Possible exploit attempt from 198.51.100.23:27017
+Mar 04 05:04:50 [nsm] ALERT: Possible exploit attempt from 10.0.0.50:5432
+Mar 04 19:04:50 localhost sshd[12345]: authentication failure; logname= uid=0 euid=0 tty=ssh ruser= rhost=192.168.1.50
+Mar 04 07:04:50 [IDS] Port scan detected from 10.0.0.50
+172.16.0.25 - - [04/Mar/2026:03:19:50 +0000] "GET /api/search?q=1' AND '1'='1 HTTP/1.1" 500 68395 "-" "sqlmap/1.0"
+198.51.100.23 - - [04/Mar/2026:12:41:50 +0000] "GET /comment.php?text=<script>alert('xss')</script> HTTP/1.1" 200 93892 "-" "Mozilla/5.0"
+198.51.100.44 - - [04/Mar/2026:11:45:50 +0000] "GET /comment.php?text=<svg/onload=alert(1)> HTTP/1.1" 403 26429 "-" "Mozilla/5.0"
+192.0.2.15 - - [04/Mar/2026:13:48:50 +0000] "GET /api/search?q=1 UNION SELECT * FROM users HTTP/1.1" 403 94012 "-" "sqlmap/1.0"
+Mar 04 21:04:50 localhost sshd[12345]: Failed password for root from 172.16.0.25 port 22 ssh2
+Mar 04 08:04:50 localhost sshd[12345]: Failed password for user from 10.0.0.100 port 22 ssh2
+203.0.113.99 - - [04/Mar/2026:06:28:50 +0000] "GET / HTTP/1.1" 404 2065 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64)"
+Mar 04 20:04:50 [FIREWALL] Connection attempt blocked: 192.0.2.15:6379
+10.0.0.100 - - [04/Mar/2026:00:14:50 +0000] "GET /download/../../../etc/passwd HTTP/1.1" 200 89561 "-" "curl/7.68.0"
+Mar 04 02:04:50 localhost sshd[12345]: Invalid user guest from 10.0.0.50 port 22

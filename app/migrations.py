@@ -54,7 +54,13 @@ def migrate_json_to_db(app):
         # Migrate users
         if not is_migration_completed('migrate_users'):
             try:
-                users = load_users()
+                users = {}
+                try:
+                    with open('web/users.json', 'r') as f:
+                        users = json.load(f)
+                except Exception as e:
+                    print(f"Could not load users.json: {e}")
+                
                 migrated_count = 0
                 
                 for username, user_data in users.items():

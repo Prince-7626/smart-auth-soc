@@ -1,11 +1,11 @@
 {
   "admin": {
-    "password": "scrypt:32768:8:1$5g5e7z1c5c5e7z1c$f8d8f8d8f8d8f8d8f8d8f8d8f8d8f8d8f8d8f8d8f8d8f",
+    "password": "pbkdf2:sha256:600000$NSWsJavMSXptcMi2$c530db31537610f94e613af4c018114c97e53098789d35e56045b24f3cb65bc2",
     "role": "admin",
     "created_at": "2026-03-01T10:00:00"
   },
   "analyst": {
-    "password": "scrypt:32768:8:1$5g5e7z1c5c5e7z1c$f8d8f8d8f8d8f8d8f8d8f8d8f8d8f8d8f8d8f8d8f8d8f",
+    "password": "pbkdf2:sha256:600000$nUWxnc4ECKOCsDNQ$e1deeb2027c1f30e9701609c8d1743d3e9c175bcb07a6f0461d143593be2ad6a",
     "role": "analyst",
     "created_at": "2026-03-02T14:30:00"
   }

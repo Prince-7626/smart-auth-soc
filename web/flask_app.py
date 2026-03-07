@@ -3,6 +3,7 @@ import json
 from datetime import datetime, timedelta
 from functools import wraps
 from flask import Flask, render_template, request, redirect, url_for, session, jsonify
+from flask_socketio import SocketIO
 from werkzeug.security import generate_password_hash, check_password_hash
 import secrets
 from dotenv import load_dotenv
@@ -11,8 +12,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # Initialize Flask app
-app = Flask(__name__, template_folder='templates')
-app.secret_key = secrets.token_hex(32)
+FRONTEND_DIST = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'frontend', 'dist')
+app = Flask(__name__, template_folder='templates', static_folder=os.path.join(FRONTEND_DIST, 'assets'), static_url_path='/assets')
+app.secret_key = os.getenv('SECRET_KEY', 'default-static-secret-key-soc-platform-12345')
+
+# Initialize SocketIO
+socketio = SocketIO(app, cors_allowed_origins="*")
 
 # Database configuration
 app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///smartauth_soc.db')
@@ -81,23 +86,42 @@ with app.app_context():
 
 # Load users
 def load_users():
-    with open(USERS_FILE, "r") as f:
-        return json.load(f)
+    users_dict = {}
+    with app.app_context():
+        users_db = User.query.all()
+        for u in users_db:
+            users_dict[u.username] = {
+                "password": u.password_hash,
+                "role": u.role,
+                "created_at": u.created_at.isoformat() if u.created_at else "Unknown"
+            }
+    return users_dict
 
 # Load SOC data
 def load_soc_data():
-    if os.path.exists(SOC_DATA_FILE):
-        try:
-            with open(SOC_DATA_FILE, "r") as f:
-                return json.load(f)
-        except:
-            pass
-    return {
-        "total_failed": 0,
-        "unique_ips": 0,
-        "blocked_ips": {},
-        "ml_alerts": 0
-    }
+    with app.app_context():
+        # get blocked IPs
+        blocked_ips_db = BlockedIP.query.all()
+        blocked_ips = {}
+        for b in blocked_ips_db:
+            blocked_ips[b.ip_address] = {
+                "severity": b.severity,
+                "reason": b.reason,
+                "location": b.location,
+                "blocked_at": b.blocked_at.strftime("%Y-%m-%d %H:%M:%S") if b.blocked_at else "Unknown"
+            }
+            
+        total_failed = AuditLog.query.filter_by(status='failure').count()
+        from sqlalchemy import func
+        unique_ips = db.session.query(func.count(func.distinct(AuditLog.source_ip))).scalar() or 0
+        ml_alerts = Incident.query.count()
+        
+        return {
+            "total_failed": total_failed,
+            "unique_ips": unique_ips,
+            "blocked_ips": blocked_ips,
+            "ml_alerts": ml_alerts
+        }
 
 # Audit logging helper
 def log_audit_event(action, status='success', resource_type=None, resource_id=None, details=None):
@@ -171,8 +195,13 @@ def login():
         # Validate CSRF token
         csrf_token = request.form.get('csrf_token')
         stored_token = session.get('csrf_token')
+        
+        # Provide a token for re-rendering the form on errors
+        display_token = stored_token if stored_token else CSRFProtection.generate_token()
+        session['csrf_token'] = display_token
+        
         if not csrf_token or not stored_token or not CSRFProtection.validate_token(csrf_token, stored_token):
-            return render_template('login.html', error='Security validation failed. Please try again.'), 403
+            return render_template('login.html', error='Security validation failed. Please try again.', csrf_token=display_token), 403
         
         # Get and validate inputs
         username = request.form.get('username', '').strip()
@@ -185,7 +214,7 @@ def login():
                 raise ValueError("Invalid username format")
         except ValueError as e:
             log_audit_event('login_attempt', 'failure', resource_type='authentication', details={'reason': str(e), 'username': username})
-            return render_template('login.html', error='Invalid username or password.')
+            return render_template('login.html', error='Invalid username or password.', csrf_token=display_token)
         
         users = load_users()
 
@@ -208,7 +237,7 @@ def login():
         if state.get('blocked_until') and now < state['blocked_until']:
             retry_after = int((state['blocked_until'] - now).total_seconds())
             log_audit_event('login_attempt', 'failure', resource_type='authentication', details={'reason': 'rate_limited', 'ip': ip})
-            return render_template('login.html', error=f'Too many attempts. Try again in {retry_after} seconds.')
+            return render_template('login.html', error=f'Too many attempts. Try again in {retry_after} seconds.', csrf_token=display_token)
 
         # Check credentials
         if username in users and check_password_hash(users[username]['password'], password):
@@ -239,26 +268,36 @@ def login():
             if state['count'] >= LOGIN_ATTEMPT_THRESHOLD:
                 state['blocked_until'] = now + BLOCK_DURATION
                 login_attempts[ip] = state
-                return render_template('login.html', error=f'Too many failed attempts. Temporarily blocked for {int(BLOCK_DURATION.total_seconds()/60)} minutes.')
+                return render_template('login.html', error=f'Too many failed attempts. Temporarily blocked for {int(BLOCK_DURATION.total_seconds()/60)} minutes.', csrf_token=display_token)
 
-            return render_template('login.html', error='Invalid username or password')
+            return render_template('login.html', error='Invalid username or password', csrf_token=display_token)
 
     return render_template('login.html')
 
 @app.route('/dashboard')
 @login_required
 def dashboard():
-    data = load_soc_data()
-    return render_template(
-        'dashboard.html',
-        username=session.get('username'),
-        role=session.get('role'),
-        total_failed=data.get('total_failed', 0),
-        unique_ips=data.get('unique_ips', 0),
-        blocked_count=len(data.get('blocked_ips', {})),
-        ml_alerts=data.get('ml_alerts', 0),
-        blocked_ips=data.get('blocked_ips', {})
-    )
+    from flask import send_from_directory
+    return send_from_directory(FRONTEND_DIST, 'index.html')
+@app.route('/api/incidents')
+@login_required
+def api_incidents():
+    try:
+        incidents = Incident.query.order_by(Incident.timestamp.desc()).limit(100).all()
+        return jsonify([
+            {
+                "id": inc.id,
+                "incident_id": inc.incident_id,
+                "title": inc.title,
+                "severity": inc.severity,
+                "ip": inc.source_ip,
+                "location": inc.location,
+                "reason": inc.description,
+                "timestamp": inc.timestamp.strftime("%Y-%m-%d %H:%M:%S")
+            } for inc in incidents
+        ])
+    except Exception as e:
+        return jsonify([])
 
 @app.route('/api/dashboard-data')
 @login_required
@@ -563,6 +602,37 @@ def api_detection_analyze():
         app.logger.error(f"Error analyzing logs: {e}")
         return jsonify({'error': str(e)}), 500
 
+@app.route('/api/logs/upload', methods=['POST'])
+@login_required
+def api_logs_upload():
+    """Upload new logs to the monitoring system"""
+    try:
+        if 'file' not in request.files:
+            return jsonify({'error': 'No file provided'}), 400
+            
+        file = request.files['file']
+        if file.filename == '':
+            return jsonify({'error': 'No file selected'}), 400
+            
+        # Append lines to web_auth.log
+        contents = file.read().decode('utf-8')
+        if not contents:
+            return jsonify({'error': 'File is empty'}), 400
+
+        with open(LOG_FILE, 'a', encoding='utf-8') as f:
+            f.write(contents)
+            if not contents.endswith('\n'):
+                f.write('\n')
+                
+        # Count lines for response
+        lines = len(contents.splitlines())
+        log_audit_event('log_upload', 'success', resource_type='system_logs', details={'filename': file.filename, 'lines': lines})
+        
+        return jsonify({'success': True, 'message': f'Successfully queued {lines} log entries for analysis'})
+    except Exception as e:
+        app.logger.error(f"Error uploading logs: {e}")
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/logout')
 def logout():
     username = session.get('username')
@@ -604,5 +674,11 @@ def not_found(error):
 def server_error(error):
     return render_template('500.html'), 500
 
+def start_monitor():
+    from app.monitor import monitor
+    monitor(app, socketio)
+
 if __name__ == '__main__':
-    app.run(host='127.0.0.1', port=5000, debug=True)
+    # Start the monitor in a background thread
+    socketio.start_background_task(start_monitor)
+    socketio.run(app, host='127.0.0.1', port=5000, debug=True, use_reloader=False)
